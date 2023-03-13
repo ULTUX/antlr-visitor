@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("application")
     antlr
 }
 
@@ -23,4 +24,12 @@ tasks.generateGrammarSource {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+application {
+    mainClass.set("pl.edu.pwr.lab.Main")
+}
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`;
 }
