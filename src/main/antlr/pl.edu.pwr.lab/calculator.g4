@@ -6,7 +6,18 @@ equation
    ;
 
 expression
+   : alg_expression
+   | statement
+   ;
+
+alg_expression
    : multiplyingExpression ((PLUS | MINUS) multiplyingExpression)*
+   ;
+
+statement
+   : 'if' '(' condition=alg_expression ')' '[' ifExpr=expression ']' ('else' '[' elseExpr=alg_expression ']')? #if_stat
+   | 'while' '(' condition=alg_expression ')' '[' expression ']' #while_stat
+   | 'for' '(' condition=alg_expression ')' '[' expression ']' #for_stat
    ;
 
 multiplyingExpression
