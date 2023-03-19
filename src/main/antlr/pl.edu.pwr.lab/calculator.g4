@@ -2,27 +2,49 @@ grammar calculator;
 @header {package pl.edu.pwr.lab;}
 
 equation
-   : expression relop expression EOF
+   : (instruct)+ EOF
    ;
 
-expression
+instruct
    : alg_expression
    | statement
+   | decl
+   | shellInstruct
+   | funcDecl
+   | funCall
    ;
+
+decl
+  : varName=variable '=' (alg_expression | assignmentVar=variable)
+  ;
 
 alg_expression
    : multiplyingExpression ((PLUS | MINUS) multiplyingExpression)*
    ;
 
 statement
-   : 'if' '(' condition=alg_expression ')' '[' ifExpr=expression ']' ('else' '[' elseExpr=alg_expression ']')? #if_stat
-   | 'while' '(' condition=alg_expression ')' '[' expression ']' #while_stat
-   | 'for' '(' condition=alg_expression ')' '[' expression ']' #for_stat
+   : 'if' '(' condition=alg_expression ') [' ifExpr=instruct ']' ('else' '[' elseExpr=instruct+ ']')? #IfStatement
+   | 'while' '(' condition=alg_expression ') [' instruct+ ']' #WhileStatement
+   | 'for' '(' condition=alg_expression ') [' instruct+ ']' #ForStatement
    ;
 
 multiplyingExpression
    : powExpression ((TIMES | DIV) powExpression)*
    ;
+
+funcDecl
+  : 'fun' variable '() [' instruct ']' #ArgLessFunction
+  | 'fun' variable '(' variable+? ') [' instruct ']' #ArgFullFunction
+  ;
+
+funCall
+  : variable '()' #ArgLessFunctionCall
+  | variable '('variable+?')' #ArgFullFunctionCall
+  ;
+
+shellInstruct
+  : 'run [' STRING ']'
+  ;
 
 powExpression
    : signedAtom (POW signedAtom)*
@@ -31,103 +53,37 @@ powExpression
 signedAtom
    : PLUS signedAtom
    | MINUS signedAtom
-   | func_
    | atom
    ;
 
 atom
    : scientific
    | variable
-   | constant
-   | LPAREN expression RPAREN
+   | LPAREN instruct RPAREN
    ;
 
 scientific
    : SCIENTIFIC_NUMBER
    ;
 
-constant
-   : PI
-   | EULER
-   | I
-   ;
+STRING
+  : '"' STRING_VAL '"'
+  ;
+fragment STRING_VAL
+  : ( '\\' [\\"] | ~[\\"\r\n] )*
+  ;
 
 variable
    : VARIABLE
    ;
 
-func_
-   : funcname LPAREN expression (COMMA expression)* RPAREN
-   ;
-
-funcname
-   : COS
-   | TAN
-   | SIN
-   | ACOS
-   | ATAN
-   | ASIN
-   | LOG
-   | LN
-   | SQRT
-   ;
-
 relop
    : EQ
-   | GT
-   | LT
    ;
-
-
-COS
-   : 'cos'
-   ;
-
-
-SIN
-   : 'sin'
-   ;
-
-
-TAN
-   : 'tan'
-   ;
-
-
-ACOS
-   : 'acos'
-   ;
-
-
-ASIN
-   : 'asin'
-   ;
-
-
-ATAN
-   : 'atan'
-   ;
-
-
-LN
-   : 'ln'
-   ;
-
-
-LOG
-   : 'log'
-   ;
-
-
-SQRT
-   : 'sqrt'
-   ;
-
 
 LPAREN
    : '('
    ;
-
 
 RPAREN
    : ')'
@@ -169,33 +125,8 @@ EQ
    ;
 
 
-COMMA
-   : ','
-   ;
-
-
-POINT
-   : '.'
-   ;
-
-
 POW
    : '^'
-   ;
-
-
-PI
-   : 'pi'
-   ;
-
-
-EULER
-   : E2
-   ;
-
-
-I
-   : 'i'
    ;
 
 
