@@ -1,11 +1,12 @@
 package pl.edu.pwr.lab;
 
 import java.io.IOException;
-
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.stringtemplate.v4.STGroup;
+import org.stringtemplate.v4.STGroupFile;
 
 public class Main {
 
@@ -25,12 +26,10 @@ public class Main {
     // start parsing at the equation rule
     ParseTree tree = parser.equation();
     // System.out.println(tree.toStringTree());
-
+    STGroup group = new STGroupFile("src/main/antlr/pl.edu.pwr.lab/register.stg");
     // create a visitor to traverse the parse tree
-    CalculatorVisitorImpl visitor = new CalculatorVisitorImpl();
-    visitor.visit(tree);
-    visitor.declaratedVars.forEach((s, aFloat) -> {
-      System.out.println(s + ": " + aFloat);
-    });
+    var visitor = new EmitVisitor(group);
+    var res = visitor.visit(tree);
+    System.out.println(res.render());
   }
 }
