@@ -9,50 +9,77 @@ instruct
    : alg_expression
    | statement
    | decl
+   | shellInstruct
    | funcDecl
+   | funCall
    ;
 
-funcDecl
-   : 'fun' variable '() [' instruct ']' #ArgLessFunction
-   | 'fun' variable '(' variable+? ') [' instruct ']' #ArgFullFunction
- ;
-
 decl
-   : varName=variable '=' alg_expression
- ;
-
-statement
-    : 'if' '(' condition=alg_expression ') [' ifExpr=instruct ']' ('else' '[' elseExpr=instruct+ ']')? #IfStatement
-    | 'while' '(' condition=alg_expression ') [' instruct+ ']' #WhileStatement
-    | 'for' '(' condition=alg_expression ') [' instruct+ ']' #ForStatement
-    ;
+  : varName=variable '=' (alg_expression | assignmentVar=variable)
+  ;
 
 alg_expression
-   : multiplyingExpression (PLUS | MINUS) alg_expression #Alg
-   | multiplyingExpression #NoAgl
+   : multiplyingExpression ((PLUS | MINUS) multiplyingExpression)*
+   ;
+
+statement
+   : 'if' '(' condition=alg_expression ') [' ifExpr=instruct ']' ('else' '[' elseExpr=instruct+ ']')? #IfStatement
+   | 'while' '(' condition=alg_expression ') [' instruct+ ']' #WhileStatement
+   | 'for' '(' condition=alg_expression ') [' instruct+ ']' #ForStatement
    ;
 
 multiplyingExpression
-   : powExpression (TIMES | DIV) multiplyingExpression #Mlt
-   | powExpression #NoMlt
+   : powExpression ((TIMES | DIV) powExpression)*
    ;
+
+funcDecl
+  : 'fun' variable '() [' instruct ']' #ArgLessFunction
+  | 'fun' variable '(' variable+? ') [' instruct ']' #ArgFullFunction
+  ;
+
+funCall
+  : variable '()' #ArgLessFunctionCall
+  | variable '('variable+?')' #ArgFullFunctionCall
+  ;
+
+shellInstruct
+  : 'run [' STRING ']'
+  ;
+
 powExpression
-   : signedAtom POW powExpression #Pow
-   | signedAtom #NoPow
+   : signedAtom (POW signedAtom)*
    ;
 
 signedAtom
-   : SCIENTIFIC_NUMBER
-   | variable
+   : PLUS signedAtom
+   | MINUS signedAtom
+   | atom
    ;
+
+atom
+   : scientific
+   | variable
+   | LPAREN instruct RPAREN
+   ;
+
+scientific
+   : SCIENTIFIC_NUMBER
+   ;
+
+STRING
+  : '"' STRING_VAL '"'
+  ;
+fragment STRING_VAL
+  : ( '\\' [\\"] | ~[\\"\r\n] )*
+  ;
 
 variable
    : VARIABLE
    ;
 
-fragment STRING_VAL
-  : ( '\\' [\\"] | ~[\\"\r\n] )*
-  ;
+relop
+   : EQ
+   ;
 
 LPAREN
    : '('
