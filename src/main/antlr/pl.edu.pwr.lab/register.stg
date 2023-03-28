@@ -1,0 +1,71 @@
+deflt(elem) ::= <<
+  <elem; separator="\n" >
+>>
+
+int(i) ::= <<
+  MOV A, #<i>
+>>
+
+twoop(p1, p2) ::= <<
+  <p2>
+  PUSH A
+  <p1>
+  POP B
+>>
+
+deklaracja(x, pos) ::= <<
+  SUB %SP, %4, %SP
+  <x>
+  MOV A, -<pos>(%BP)
+>>
+
+while(cond,instruct) ::= <<
+  while0:
+  <cond>
+  JEQ false0
+  <instruct>
+  JMP while0
+  false0:
+>>
+
+deklaracja_funkcji_bez_arg(instruct) ::= <<
+  <label>():
+  <instruct>
+>>
+
+deklaracja_funkcji_z_arg(label, instruct) ::= <<
+>>
+
+
+zmienna(pos) ::= <<
+  MOV A, -<pos>(%BP)
+>>
+
+jesli(cond, ifTrue, ifFalse) ::= <<
+  <cond>
+  JE false0
+  <ifTrue>
+  JMP endIf
+  false0:
+  <ifFalse>
+  endIf:
+>>
+
+dodaj(p1, p2) ::= <<
+  <twoop(p1, p2)>
+  ADD A, B
+>>
+
+pomnoz(p1, p2) ::= <<
+  <twoop(p1, p2)>
+  MUL A, B
+>>
+
+potega(p1, p2) ::= <<
+  <twoop(p1, p2)>
+  POW A, B
+>>
+
+dek(n) ::= <<
+DD <n>
+>>
